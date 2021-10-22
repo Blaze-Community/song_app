@@ -3,19 +3,19 @@ if (process.env.NODE_ENV !== "production") {
 }
 
 const express = require("express");
-// const { Client } = require('pg');
+const { Client } = require('pg');
 
-// const client = new Client({
-//     database: process.env.DATABASE_URL,
-//     ssl: {
-//         rejectUnauthorized: false
-//     }
-// });
+const client = new Client({
+    connectionString: process.env.DATABASE_URL,
+    ssl: {
+        rejectUnauthorized: false
+    }
+});
 
-// client.connect(function (err) {
-//     if (err) throw err;
-//     console.log("Connected!");
-// });
+client.connect(function (err) {
+    if (err) throw err;
+    console.log("Connected!");
+});
 
 const app = express();
 
