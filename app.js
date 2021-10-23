@@ -14,12 +14,21 @@ const client = new Client({
 
 client.connect(function (err) {
     if (err) throw err;
-    console.log("Connected!");
+    console.log('Connected!');
 });
+
+client.query(
+    `select table_name from information_schema.tables where table_schema='public';`
+    , (err, res) => {
+        if (err) throw err;
+        console.log(res);
+        client.end();
+    }
+);
 
 const app = express();
 
-const PORT = process.env.PORT | 5000;
+const PORT = process.env.PORT || 5000;
 
 app.get("/", (req, res) => {
     res.send("Helo!");
