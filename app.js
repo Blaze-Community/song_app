@@ -8,37 +8,24 @@ const helmet = require("helmet");
 const cors = require("cors");
 const healthcheck = require("./routes/api");
 const auth = require("./routes/auth");
-const { Client } = require('pg');
 
 const app = express();
-
-const client = new Client({
-    connectionString: process.env.DATABASE_URL,
-    ssl: {
-        rejectUnauthorized: false
-    }
-});
-
-client.connect(function (err) {
-    if (err) throw err;
-    console.log('Connected!');
-});
 
 app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 app.use(helmet());
 app.use(
-  cors({
-    allowedHeaders: [
-      "Content-Type",
-      "token",
-      "authorization",
-      "*",
-      "Content-Length",
-      "X-Requested-With",
-    ],
-    origin: "*",
-    preflightContinue: true,
-  })
+    cors({
+        allowedHeaders: [
+            "Content-Type",
+            "token",
+            "authorization",
+            "*",
+            "Content-Length",
+            "X-Requested-With",
+        ],
+        origin: "*",
+        preflightContinue: true,
+    })
 );
 app.use(express.json({ limit: "1024mb" }));
 app.use(express.urlencoded({ limit: "1024mb", extended: true }));

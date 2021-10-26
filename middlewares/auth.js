@@ -5,7 +5,7 @@ exports.requireSignin = (req, res, next) => {
         const token = req.headers.authorization.split(" ")[1];
         jwt.verify(
             token,
-            process.env.ACCESS_TOKEN_SECRET,
+            process.env.JWT_AUTH_TOKEN,
             async (err, data) => {
                 if (data) {
                     req.user = data.user;

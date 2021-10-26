@@ -1,13 +1,20 @@
 const { check, validationResult } = require('express-validator');
 
 exports.validateRegisterRequest = [
-    check("userInfo.email").notEmpty().withMessage("Invalid Email."),
-    check("userInfo.password").notEmpty().withMessage("Password must be atleast 8 characters long"),
+    check("userInfo.email").notEmpty().withMessage("Email must not be empty"),
+    check("userInfo.password").notEmpty().withMessage("Password must not be empty"),
+    check("userInfo.name").notEmpty().withMessage("Name must not be empty"),
+    check("userInfo.address").notEmpty().withMessage("Adress must not be empty"),
+    check("userInfo.dob").notEmpty().withMessage("Date of birth must not be empty"),
 ];
 
 exports.validateLoginRequest = [
-    check("userInfo.email").notEmpty().withMessage("Incorrect email or password."),
-    check("userInfo.password").notEmpty().withMessage("Incorrect email or password."),
+    check("userInfo.email").notEmpty().withMessage("Email must not be empty"),
+    check("userInfo.password").notEmpty().withMessage("Password must not be empty"),
+];
+
+exports.validateRefreshRequest = [
+    check("token").notEmpty().withMessage("Token must not be empty"),
 ];
 
 exports.isRequestValidated = (req, res, next) => {

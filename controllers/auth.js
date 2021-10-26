@@ -1,187 +1,353 @@
-const express = require("express");
 const jwt = require("jsonwebtoken");
-const { hashPassword } = require("./hashPassword");
+const { hashPassword, comparePassword } = require("../utils/hashPassword");
 const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const crypto = require("crypto");
+const db = require("../config/db");
 
 const JWT_AUTH_TOKEN = process.env.JWT_AUTH_TOKEN;
 const JWT_REFRESH_TOKEN = process.env.JWT_REFRESH_TOKEN;
 
 exports.register = async (req, res) => {
-    const { userInfo } = req.body;
-    userInfo.password = await hashPassword(userInfo.password);
-    const accessToken = jwt.sign({ user: userInfo }, JWT_AUTH_TOKEN, {
-        expiresIn: "600s",
-    });
-    const refreshToken = jwt.sign(
-        { user: userInfo },
-        JWT_REFRESH_TOKEN,
-        {
-            expiresIn: "1y",
-        }
-    );
-    return res.status(200).send({
-      success: true,
-      msg: "Successfully created",
-      userInfo: userInfo,
-      accessToken : accessToken,
-      refreshToken : refreshToken,
-    });
-};
 
-exports.login = (req, res) => {
-    const { userInfo } = req.body;
-    bcrypt.compare(userInfo.password,"$2b$10$Bf06Xvlbso5MC8g04sE0oupfdEW06TkkDqHizboNAzt9zBO7hvfJO", function (err, isMatch) {
-        console.log(isMatch);
-        if (err) {
-            return res.status(400).send({
-                error: err,
+    try {
+        const {
+            name,
+            email,
+            address,
+            dob,
+            password
+        } = req.body.userInfo;
+
+
+        const { rows } = await db.query(
+            `SELECT * 
+             from users 
+             where email = $1;`,
+            [email]
+        );
+
+        if (rows.length !== 0) {
+            return res.status(400).json({
                 success: false,
-                msg: "Something Went Wrong!",
+                msg: "User with this email already exists!",
             });
         }
-        if(isMatch) {
-            const accessToken = jwt.sign({ user: userInfo }, JWT_AUTH_TOKEN, {
+
+        const _password = await hashPassword(password);
+
+        await db.query(
+            `INSERT INTO users
+             (name, email, address, dob, password)
+             values ($1, $2, $3, $4, $5);`,
+            [name, email, address, dob, _password]
+        );
+
+        const accessToken = jwt.sign(
+            {
+                user: {
+                    name,
+                    email,
+                    address,
+                    dob
+                }
+            },
+            JWT_AUTH_TOKEN,
+            {
                 expiresIn: "600s",
-            });
-            const refreshToken = jwt.sign(
-                { user: userInfo },
-                JWT_REFRESH_TOKEN,
-                {
-                    expiresIn: "1y",
+            }
+        );
+
+        const refreshToken = jwt.sign(
+            {
+                user: {
+                    name,
+                    email,
+                    address,
+                    dob
                 }
-            );
-            return res.status(200).send({
-              success: true,
-              msg: "Successfully Logged In",
-              userInfo: userInfo,
-              accessToken : accessToken,
-              refreshToken : refreshToken,
-            });        
-        }
-        else{
-            return res.status(400).send({
-                error: err,
-                success: false,
-                msg: "Authorization Failed!",
-            });            
-        }
-    });
+            },
+            JWT_REFRESH_TOKEN,
+            {
+                expiresIn: "1y",
+            }
+        );
 
-};
+        return res.status(200).json({
+            success: true,
+            msg: "Registered successfully!",
+            userInfo: {
+                name,
+                email,
+                address,
+                dob,
+            },
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+        });
 
-exports.refresh = (req, res, next) => {
-    const refreshToken = req.body.token;
-    if (!refreshToken) {
-        return res.json({ success: false, msg: "Refresh token not found." });
+    } catch (e) {
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
     }
+};
 
-    jwt.verify(refreshToken, process.env.REFRESH_TOKEN_SECRET, (err, data) => {
-        if (!err) {
-            const accessToken = jwt.sign(
-                { user: data.user },
-                process.env.ACCESS_TOKEN_SECRET,
-                {
-                    expiresIn: "600s",
+exports.login = async (req, res) => {
+
+    try {
+        const {
+            email,
+            password
+        } = req.body.userInfo;
+
+        const { rows } = await db.query(
+            `SELECT *
+             from users 
+             where email = $1;`,
+            [email]
+        );
+
+        if (rows.length === 0) {
+            return res.status(400).json({
+                success: false,
+                msg: "Invalid email or password!",
+            });
+        }
+
+        const saved_password = rows[0].password;
+
+        const isMatch = await comparePassword(password, saved_password);
+
+        if (!isMatch) {
+            return res.status(400).json({
+                success: false,
+                msg: "Invalid email or password!",
+            });
+        }
+
+        const accessToken = jwt.sign(
+            {
+                user: {
+                    email
                 }
-            );
-            return res
-                .status(200)
-                .json({ success: true, accessToken: accessToken });
-        } else if (err.message == "jwt expired") {
+            },
+            JWT_AUTH_TOKEN,
+            {
+                expiresIn: "600s",
+            }
+        );
+        const refreshToken = jwt.sign(
+            {
+                user: {
+                    email
+                }
+            },
+            JWT_REFRESH_TOKEN,
+            {
+                expiresIn: "1y",
+            }
+        );
+        return res.status(200).json({
+            success: true,
+            msg: "Login successful",
+            userInfo: {
+                email
+            },
+            accessToken: accessToken,
+            refreshToken: refreshToken,
+        });
+
+    } catch (e) {
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
+    }
+};
+
+exports.refresh = (req, res) => {
+
+    const refreshToken = req.body.token;
+
+    jwt.verify(
+        refreshToken,
+        process.env.JWT_REFRESH_TOKEN,
+        (err, data) => {
+            if (!err) {
+
+                const accessToken = jwt.sign(
+                    { user: data.user },
+                    process.env.JWT_AUTH_TOKEN,
+                    {
+                        expiresIn: "600s",
+                    }
+                );
+
+                return res.status(200).json({
+                    success: true,
+                    accessToken: accessToken
+                });
+
+            } else if (err.message == "jwt expired") {
+
+                return res.status(400).json({
+                    success: false,
+                    msg: "Refresh token expired, Please Login again!",
+                });
+
+            } else {
+
+                return res.status(400).json({
+                    success: false,
+                    msg: "invalid refresh token",
+                });
+            }
+        });
+};
+
+// set new password
+exports.changePassword = async (req, res) => {
+
+    try {
+
+        const {
+            password,
+            newPassword
+        } = req.body.userInfo;
+
+        const { email } = req.user;
+
+        const { rows } = await db.query(
+            `SELECT *
+             from users 
+             where email = $1;`,
+            [email]
+        );
+
+        if (rows.length === 0) {
             return res.status(400).json({
                 success: false,
-                msg: "Refresh token expired, Please Login again!",
+                msg: "Invalid email!",
             });
-        } else {
+        }
+
+        const saved_password = rows[0].password;
+
+        const isMatch = await comparePassword(password, saved_password);
+
+        if (!isMatch) {
             return res.status(400).json({
                 success: false,
-                msg: "invalid refresh token",
+                msg: "Invalid password!",
             });
         }
-    });
-};
 
-exports.userInfo = (req, res) => {
-};
+        const hashed_password = await hashPassword(newPassword);
 
-exports.editProfile = (req, res) => {
-};
+        await db.query(
+            `UPDATE users
+                 SET password = $1
+                 where email = $2;`,
+            [hashed_password, email]
+        );
 
-exports.changePassword = (req, res) => {
-    const { passwordInfo } = req.body;
-    bcrypt.compare(passwordInfo.oldPassword,"$2b$10$Bf06Xvlbso5MC8g04sE0oupfdEW06TkkDqHizboNAzt9zBO7hvfJO", function (err, isMatch) {
-        console.log(isMatch);
-        if (err) {
-            return res.status(400).send({
-                error: err,
-                success: false,
-                msg: "Something Went Wrong!",
-            });
-        }
-        if(isMatch) {
-            return res.status(200).send({
-              success: true,
-              msg: "Password Change Successfully",
-            });        
-        }
-        else{
-            return res.status(400).send({
-                error: err,
-                success: false,
-                msg: "Old Password is Not Correct!",
-            });            
-        }
-    });
+        return res.status(200).json({
+            success: true,
+            msg: "Password Change Successfully!",
+        });
+
+    } catch (e) {
+
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
+    }
 };
 
 exports.requestResetPassword = async (req, res) => {
-    let token = crypto.randomBytes(32).toString("hex");
-    const hash = await hashPassword(token);
-    const resetToken = jwt.sign({ token : hash}, "RESET PASSWORD", {
-        expiresIn: "600s",
-    });
-    let _email = req.body.email;
-    const id = 1;
-    let link = `http://localhost:5000/api/resetPassword/${id}/${resetToken}`;
-    let transporter = nodemailer.createTransport({
-        service: "gmail",
-        auth: {
-            user: "blazecommunity001@gmail.com",
-            pass: "Fuckme123@@@",
-        },
-    });
-    let mailOptions = {
-        from: "blazecommunity001@gmail.com",
-        to: _email,
-        subject: "Password Reset - IIITN",
-        text: `Here's the link to reset your password - ${link}`,
-    };
-    transporter.sendMail(mailOptions, function (err, data) {
-        if (err) {
-            return res.status(400).send({
-                error: err,
+
+    try {
+
+        let token = crypto.randomBytes(32).toString("hex");
+
+        const resetToken = jwt.sign(
+            { token: token },
+            JWT_AUTH_TOKEN,
+            {
+                expiresIn: "600s",
+            }
+        );
+
+        let { email } = req.body;
+
+        const { rows } = await db.query(
+            `SELECT *
+             from users 
+             where email = $1;`,
+            [email]
+        );
+
+        if (rows.length === 0) {
+            return res.status(400).json({
                 success: false,
-                msg: "Something Went Wrong!",
-            });
-        } else {
-            res.status(200).send({
-                success: true,
-                msg: "email sent successfully",
+                msg: "Invalid email!",
             });
         }
-    });
+
+        const id = rows[0].user_id;
+
+        let link = `http://localhost:5000/api/resetPassword/${id}/${resetToken}`;
+
+        let transporter = nodemailer.createTransport({
+            service: "gmail",
+            auth: {
+                user: process.env.SENDER_EMAIL,
+                pass: process.env.SENDER_PASSWORD,
+            },
+        });
+
+        let mailOptions = {
+            from: "blazecommunity001@gmail.com",
+            to: email,
+            subject: "Password Reset - SONG APP",
+            text: `Here's the link to reset your password - ${link}`,
+        };
+
+        transporter.sendMail(mailOptions, function (err, data) {
+            if (err) {
+                return res.status(400).json({
+                    error: err,
+                    success: false,
+                    msg: "Something Went Wrong!",
+                });
+            } else {
+                res.status(200).json({
+                    success: true,
+                    msg: "email sent successfully",
+                });
+            }
+        });
+
+    } catch (e) {
+
+    }
 
 };
 
 exports.resetPasswordForm = (req, res) => {
+
     jwt.verify(
         req.params.token,
-        "RESET PASSWORD",
+        JWT_AUTH_TOKEN,
         async (err, data) => {
             if (data) {
-            res.send(`<!DOCTYPE html>
+                res.send(`<!DOCTYPE html>
                 <html lang="en">
                     <head>
                         <meta charset="UTF-8" />
@@ -215,20 +381,43 @@ exports.resetPasswordForm = (req, res) => {
     );
 };
 
+// reset password on forgetting
 exports.resetPassword = async (req, res) => {
-    if(req.body.reenterNewPassword != req.body.newPassword){
-        return res.status(400).send({
-            error: err,
+
+    try {
+        const { reenterNewPassword, newPassword } = req.body;
+        const { id } = req.params;
+
+        if (reenterNewPassword != newPassword) {
+            return res.status(400).json({
+                error: err,
+                success: false,
+                msg: "Password Dont Match",
+            });
+        }
+        else {
+            const hashedPassword = await hashPassword(newPassword);
+
+            await db.query(
+                `UPDATE users
+                     SET password = $1
+                     where user_id = $2;`,
+                [hashedPassword, id]
+            );
+
+            return res.status(200).json({
+                success: true,
+                newPassword: req.body.newPassword,
+                msg: "Password Reset Successfully",
+            });
+        }
+
+    } catch (e) {
+
+        return res.status(400).json({
+            error: e,
             success: false,
-            msg: "Password Dont Match",
-        });   
-    }
-    else{
-        const hastPassword = await hashPassword(req.body.newPassword);
-        return res.status(200).send({
-            success: true,
-            newPassword : req.body.newPassword,
-            msg: "Password Reset Successfully",
+            msg: "Something Went Wrong!",
         });
-    }  
+    }
 };

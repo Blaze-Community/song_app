@@ -11,23 +11,21 @@ const {
     resetPasswordForm,
     requestResetPassword,
 } = require("../controllers/auth");
-const { requireSignin, upload } = require("../middlewares/auth");
+const { requireSignin } = require("../middlewares/auth");
 const {
     validateLoginRequest,
+    validateRefreshRequest,
     isRequestValidated,
     validateRegisterRequest,
 } = require("../validators/auth");
+
 const router = express.Router();
 
 router.post("/login", validateLoginRequest, isRequestValidated, login);
 
 router.post("/register", validateRegisterRequest, isRequestValidated, register);
 
-router.post("/refresh", refresh);
-
-router.get("/userInfo", requireSignin, isRequestValidated, userInfo);
-
-router.post("/editprofile", requireSignin, isRequestValidated, editProfile);
+router.post("/refresh", validateRefreshRequest, isRequestValidated, refresh);
 
 router.post("/changepassword", requireSignin, changePassword);
 
