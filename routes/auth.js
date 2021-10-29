@@ -1,17 +1,17 @@
 const express = require("express");
-const { reset } = require("nodemon");
+
 const {
     login,
     register,
     refresh,
-    userInfo,
-    editProfile,
     changePassword,
     resetPassword,
     resetPasswordForm,
     requestResetPassword,
 } = require("../controllers/auth");
+
 const { requireSignin } = require("../middlewares/auth");
+
 const {
     validateLoginRequest,
     validateRefreshRequest,
@@ -27,12 +27,13 @@ router.post("/register", validateRegisterRequest, isRequestValidated, register);
 
 router.post("/refresh", validateRefreshRequest, isRequestValidated, refresh);
 
-router.post("/changepassword", requireSignin, changePassword);
+router.patch("/changepassword", requireSignin, changePassword);
 
 router.post("/requestResetPassword", requestResetPassword);
 
 router.get("/resetPassword/:id/:token", resetPasswordForm);
 
-router.post("/resetPassword/:id", resetPassword);
+// add validator for this
+router.patch("/resetPassword/:id", resetPassword);
 
 module.exports = router;

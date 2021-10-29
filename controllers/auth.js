@@ -117,6 +117,8 @@ exports.login = async (req, res) => {
             });
         }
 
+        console.log(rows[0].user_id);
+
         const saved_password = rows[0].password;
 
         const isMatch = await comparePassword(password, saved_password);
@@ -313,7 +315,7 @@ exports.requestResetPassword = async (req, res) => {
         });
 
         let mailOptions = {
-            from: "blazecommunity001@gmail.com",
+            from: process.env.SENDER_EMAIL,
             to: email,
             subject: "Password Reset - SONG APP",
             text: `Here's the link to reset your password - ${link}`,
@@ -335,7 +337,11 @@ exports.requestResetPassword = async (req, res) => {
         });
 
     } catch (e) {
-
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
     }
 
 };
