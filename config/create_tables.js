@@ -16,6 +16,7 @@ pool.on('connect', () => {
 // run heroku pg:reset DATABASE on cli to clear database
 // then run this file to feed data
 
+
 const create_tables = async () => {
 
     try {
