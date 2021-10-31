@@ -81,11 +81,15 @@ const create_tables = async () => {
             `CREATE TABLE friends(
                 user_id integer NOT NULL,
                 friend_id integer NOT NULL,
+                status CHAR(1) CHECK(status IN ('0', '1', '2')) NOT NULL,
                 CONSTRAINT USERID_FRIENDS_FK FOREIGN KEY (user_id) REFERENCES users(user_id),
                 CONSTRAINT FREINDID_FK FOREIGN KEY (friend_id) REFERENCES users(user_id),
                 CONSTRAINT FREINDS_PK PRIMARY KEY(user_id,friend_id)
             );`
         );
+        // 0 means user_id sent friend request to friend_id and is pending
+        // 2 means user_id got friend request from friend_id and is pending
+        // 1 means friendship has been established
 
         await pool.query(
             `CREATE TABLE fav_songs(

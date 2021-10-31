@@ -9,6 +9,7 @@ const cors = require("cors");
 const healthcheck = require("./routes/api");
 const auth = require("./routes/auth");
 const user = require("./routes/user");
+const friend = require("./routes/friend");
 
 const app = express();
 
@@ -35,6 +36,7 @@ const PORT = process.env.PORT || 5000;
 app.use("/api", healthcheck);
 app.use("/api", auth);
 app.use("/api/user", user);
+app.use("/api/friends", friend);
 
 app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
