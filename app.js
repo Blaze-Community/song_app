@@ -10,6 +10,8 @@ const healthcheck = require("./routes/api");
 const auth = require("./routes/auth");
 const user = require("./routes/user");
 const friend = require("./routes/friend");
+const song = require("./routes/song");
+const db = require("./config/db");
 
 const app = express();
 
@@ -37,7 +39,16 @@ app.use("/api", healthcheck);
 app.use("/api", auth);
 app.use("/api/user", user);
 app.use("/api/friends", friend);
+app.use("/api", song);
 
+// db.query(`select * from fav_songs;`,(err,data)=>{
+//     if(err){
+//         console.log(err);
+//     }
+//     else{
+//         console.log(data);
+//     }
+// })
 app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
 });

@@ -9,6 +9,7 @@ exports.requireSignin = (req, res, next) => {
             async (err, data) => {
                 if (data) {
                     req.user = data.user;
+                    next();
                 } else if (err.message === "jwt expired") {
                     return res.json({
                         success: false,
@@ -20,5 +21,4 @@ exports.requireSignin = (req, res, next) => {
     } else {
         return res.status(400).json({ error: "Authorization required" });
     }
-    next();
 };
