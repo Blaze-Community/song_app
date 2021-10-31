@@ -43,14 +43,11 @@ exports.register = async (req, res) => {
             [name, email, address, dob, _password]
         );
 
+        delete rows[0]['password'];
+
         const accessToken = jwt.sign(
             {
-                user: {
-                    name,
-                    email,
-                    address,
-                    dob
-                }
+                user: rows[0]
             },
             JWT_AUTH_TOKEN,
             {
@@ -60,12 +57,7 @@ exports.register = async (req, res) => {
 
         const refreshToken = jwt.sign(
             {
-                user: {
-                    name,
-                    email,
-                    address,
-                    dob
-                }
+                user: rows[0]
             },
             JWT_REFRESH_TOKEN,
             {
@@ -76,12 +68,7 @@ exports.register = async (req, res) => {
         return res.status(200).json({
             success: true,
             msg: "Registered successfully!",
-            userInfo: {
-                name,
-                email,
-                address,
-                dob,
-            },
+            userInfo: rows[0],
             accessToken: accessToken,
             refreshToken: refreshToken,
         });
@@ -128,11 +115,13 @@ exports.login = async (req, res) => {
             });
         }
 
+        delete rows[0]['password'];
+
+        console.log(rows[0]);
+
         const accessToken = jwt.sign(
             {
-                user: {
-                    email
-                }
+                user: rows[0]
             },
             JWT_AUTH_TOKEN,
             {
@@ -141,9 +130,7 @@ exports.login = async (req, res) => {
         );
         const refreshToken = jwt.sign(
             {
-                user: {
-                    email
-                }
+                user: rows[0]
             },
             JWT_REFRESH_TOKEN,
             {
@@ -153,9 +140,7 @@ exports.login = async (req, res) => {
         return res.status(200).json({
             success: true,
             msg: "Login successful",
-            userInfo: {
-                email
-            },
+            userInfo: rows[0],
             accessToken: accessToken,
             refreshToken: refreshToken,
         });
@@ -313,7 +298,7 @@ exports.requestResetPassword = async (req, res) => {
         });
 
         let mailOptions = {
-            from: "blazecommunity001@gmail.com",
+            from: process.env.SENDER_EMAIL,
             to: email,
             subject: "Password Reset - SONG APP",
             text: `Here's the link to reset your password - ${link}`,
@@ -335,7 +320,11 @@ exports.requestResetPassword = async (req, res) => {
         });
 
     } catch (e) {
-
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
     }
 
 };
