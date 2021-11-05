@@ -20,6 +20,7 @@ pool.on('connect', () => {
 const create_tables = async () => {
 
     try {
+
         await pool.query(
             `CREATE TABLE users (
                 name text NOT NULL,
@@ -49,7 +50,6 @@ const create_tables = async () => {
                 type text CHECK(type IN ('single','group')) NOT NULL,
                 name text,
                 artist text,
-                year date NOT NULL,
                 group_id SERIAL,
                 CONSTRAINT GRP_PK PRIMARY KEY(group_id)
             );`
