@@ -5,11 +5,9 @@ exports.sendFriendRequest = async (req, res) => {
     try {
 
         const { user_id } = req.user;
-        const { friend_id } = req.params;
+        const { friend_id } = req.body;
 
-        const frnd_id = parseInt(friend_id);
-
-        if (user_id === frnd_id) {
+        if (user_id === friend_id) {
             return res.status(400).json({
                 success: false,
                 msg: "You cannot send yourself a friend request!",
@@ -20,7 +18,7 @@ exports.sendFriendRequest = async (req, res) => {
             `SELECT *
              from users 
              where user_id = $1;`,
-            [frnd_id]
+            [friend_id]
         );
 
         if (rows.length === 0) {
@@ -34,7 +32,7 @@ exports.sendFriendRequest = async (req, res) => {
             `SELECT status
              from friends
              where user_id = $1 AND friend_id = $2;`,
-            [user_id, frnd_id]
+            [user_id, friend_id]
         );
 
         const friends = response.rows;
@@ -62,12 +60,12 @@ exports.sendFriendRequest = async (req, res) => {
 
         await db.query(
             `INSERT INTO friends values ($1, $2, '0');`,
-            [user_id, frnd_id]
+            [user_id, friend_id]
         );
 
         await db.query(
             `INSERT INTO friends values ($2, $1, '2');`,
-            [user_id, frnd_id]
+            [user_id, friend_id]
         );
 
         return res.status(200).json({
@@ -89,15 +87,13 @@ exports.acceptFriendRequest = async (req, res) => {
     try {
 
         const { user_id } = req.user;
-        const { friend_id } = req.params;
-
-        const frnd_id = parseInt(friend_id);
+        const { friend_id } = req.body;
 
         const { rows } = await db.query(
             `SELECT *
              from users 
              where user_id = $1;`,
-            [frnd_id]
+            [friend_id]
         );
 
         if (rows.length === 0) {
@@ -111,7 +107,7 @@ exports.acceptFriendRequest = async (req, res) => {
             `SELECT status
              from friends
              where user_id = $1 AND friend_id = $2;`,
-            [user_id, frnd_id]
+            [user_id, friend_id]
         );
 
         const friends = response.rows;
@@ -142,7 +138,7 @@ exports.acceptFriendRequest = async (req, res) => {
             `UPDATE friends
              SET status = '1'
              WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1);`,
-            [user_id, frnd_id]
+            [user_id, friend_id]
         );
 
         return res.status(200).json({
@@ -164,15 +160,13 @@ exports.unFriend = async (req, res) => {
     try {
 
         const { user_id } = req.user;
-        const { friend_id } = req.params;
-
-        const frnd_id = parseInt(friend_id);
+        const { friend_id } = req.body;
 
         const { rows } = await db.query(
             `SELECT *
              from users 
              where user_id = $1;`,
-            [frnd_id]
+            [friend_id]
         );
 
         if (rows.length === 0) {
@@ -186,7 +180,7 @@ exports.unFriend = async (req, res) => {
             `SELECT status
              from friends
              where user_id = $1 AND friend_id = $2;`,
-            [user_id, frnd_id]
+            [user_id, friend_id]
         );
 
         const friends = response.rows;
@@ -210,7 +204,7 @@ exports.unFriend = async (req, res) => {
             `DELETE
              from friends
              WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1);`,
-            [user_id, frnd_id]
+            [user_id, friend_id]
         );
 
         return res.status(200).json({

@@ -29,19 +29,37 @@ const create_tables = async () => {
                 dob date NOT NULL,
                 password text NOT NULL,
                 user_id SERIAL,
-                CONSTRAINT USR_PK PRIMARY KEY(user_Id)
+                CONSTRAINT USR_PK PRIMARY KEY(user_id)
+            );`
+        );
+
+        await pool.query(
+            `CREATE TABLE artist(
+                name text NOT NULL,
+                artist_id SERIAL,
+                CONSTRAINT ARTIST_PK PRIMARY KEY(artist_id)
+            );`
+        );
+
+        await pool.query(
+            `CREATE TABLE album(
+                name text NOT NULL,
+                album_id SERIAL,
+                artist_id integer NOT NULL,
+                CONSTRAINT ALBUM_PK PRIMARY KEY(album_id),
+                CONSTRAINT ARTIST_FK FOREIGN KEY (artist_id) REFERENCES artist(artist_id)
             );`
         );
 
         await pool.query(
             `CREATE TABLE songs(
-                artist text NOT NULL,
                 title text NOT NULL,
                 year date NOT NULL,
                 song_id SERIAL,
-                album text NOT NULL,
+                album_id integer NOT NULL,
                 CONSTRAINT SONG_PK PRIMARY KEY(song_id),
-                CONSTRAINT SONG_UK UNIQUE (artist , title)
+                CONSTRAINT ALBUM_FK FOREIGN KEY (album_id) REFERENCES album(album_id),
+                CONSTRAINT SONG_UK UNIQUE (year , title)
             );`
         );
 

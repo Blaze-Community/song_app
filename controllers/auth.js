@@ -19,7 +19,6 @@ exports.register = async (req, res) => {
             password
         } = req.body.userInfo;
 
-
         const { rows } = await db.query(
             `SELECT * 
              from users 
@@ -36,18 +35,21 @@ exports.register = async (req, res) => {
 
         const _password = await hashPassword(password);
 
-        await db.query(
+        const response = await db.query(
             `INSERT INTO users
              (name, email, address, dob, password)
-             values ($1, $2, $3, $4, $5);`,
+             values ($1, $2, $3, $4, $5)
+             RETURNING *;`,
             [name, email, address, dob, _password]
         );
 
-        delete rows[0]['password'];
+        const user = response.rows;
+
+        delete user[0]['password'];
 
         const accessToken = jwt.sign(
             {
-                user: rows[0]
+                user: user[0]
             },
             JWT_AUTH_TOKEN,
             {
@@ -57,7 +59,7 @@ exports.register = async (req, res) => {
 
         const refreshToken = jwt.sign(
             {
-                user: rows[0]
+                user: user[0]
             },
             JWT_REFRESH_TOKEN,
             {
@@ -68,7 +70,7 @@ exports.register = async (req, res) => {
         return res.status(200).json({
             success: true,
             msg: "Registered successfully!",
-            userInfo: rows[0],
+            userInfo: user[0],
             accessToken: accessToken,
             refreshToken: refreshToken,
         });
@@ -116,8 +118,6 @@ exports.login = async (req, res) => {
         }
 
         delete rows[0]['password'];
-
-        console.log(rows[0]);
 
         const accessToken = jwt.sign(
             {

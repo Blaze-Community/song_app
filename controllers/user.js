@@ -39,9 +39,7 @@ exports.updateUser = async (req, res) => {
 
     try {
 
-        const { id } = req.params;
-
-        console.log(req.user);
+        const { user_id } = req.user;
 
         const {
             name,
@@ -54,7 +52,7 @@ exports.updateUser = async (req, res) => {
             `SELECT * 
              from users 
              where user_id = $1;`,
-            [id]
+            [user_id]
         );
 
         if (rows.length === 0) {
@@ -68,7 +66,7 @@ exports.updateUser = async (req, res) => {
             `UPDATE users
              SET name = $1, dob = $2, address = $3
              where user_id = $4;`,
-            [name, dob, address, id]
+            [name, dob, address, user_id]
         );
 
         return res.status(200).json({
@@ -89,13 +87,13 @@ exports.deleteUser = async (req, res) => {
 
     try {
 
-        const { id } = req.params;
+        const { user_id } = req.user;
 
         const { rows } = await db.query(
             `SELECT * 
              from users 
              where user_id = $1;`,
-            [id]
+            [user_id]
         );
 
         if (rows.length === 0) {
@@ -109,14 +107,14 @@ exports.deleteUser = async (req, res) => {
             `DELETE 
              FROM friends
              where user_id = $1 OR friend_id = $1;`,
-            [id]
+            [user_id]
         );
 
         await db.query(
             `DELETE 
              FROM users
              where user_id = $1;`,
-            [id]
+            [user_id]
         );
 
         return res.status(200).json({

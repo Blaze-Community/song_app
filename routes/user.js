@@ -17,9 +17,9 @@ const router = express.Router();
 
 router.get("/:id", getUser);
 
-router.patch("/:id", requireSignin, validateUserRequest, isRequestValidated, updateUser);
+router.patch("/", requireSignin, validateUserRequest, isRequestValidated, updateUser);
 
-router.delete("/:id", requireSignin, deleteUser);
+router.delete("/", requireSignin, deleteUser);
 
 module.exports = router;
 
