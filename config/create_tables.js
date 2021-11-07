@@ -85,6 +85,14 @@ const create_tables = async () => {
                 CONSTRAINT TO_FK FOREIGN KEY (to_user) REFERENCES group_name(group_id)
             );`
         );
+        
+        await pool.query(
+            `CREATE TABLE deleted_message(
+                user_id integer,
+                msg_id integer,
+                CONSTRAINT DMS_PK PRIMARY KEY(user_id,msg_id),
+            );`
+        );
 
         await pool.query(
             `CREATE TABLE group_user(

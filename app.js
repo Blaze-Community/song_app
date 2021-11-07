@@ -41,6 +41,9 @@ app.use("/api/user", user);
 app.use("/api/friends", friend);
 app.use("/api/songs", song);
 app.use("/api/groups", group);
+app.use("/api/message", group);
+
+
 
 app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
