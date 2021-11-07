@@ -10,6 +10,7 @@ const healthcheck = require("./routes/api");
 const auth = require("./routes/auth");
 const user = require("./routes/user");
 const friend = require("./routes/friend");
+const group = require("./routes/group");
 const song = require("./routes/song");
 const db = require("./config/db");
 
@@ -39,7 +40,8 @@ app.use("/api", healthcheck);
 app.use("/api", auth);
 app.use("/api/user", user);
 app.use("/api/friends", friend);
-app.use("/api", song);
+app.use("/api/songs", song);
+app.use("/api/groups", group);
 
 // db.query(`select * from fav_songs;`,(err,data)=>{
 //     if(err){
