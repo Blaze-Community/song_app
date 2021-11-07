@@ -10,17 +10,22 @@ const {
 
 const { requireSignin } = require("../middlewares/auth");
 
+const {
+    validateFriendRequest,
+    isRequestValidated
+} = require("../validators/friend");
+
 const router = express.Router();
 
 router.get("/requests", requireSignin, getFriendRequests);
 
 router.get("/", requireSignin, getFriends);
 
-router.post("/:friend_id", requireSignin, sendFriendRequest);
+router.post("/", requireSignin, validateFriendRequest, isRequestValidated, sendFriendRequest);
 
-router.put("/:friend_id", requireSignin, acceptFriendRequest);
+router.put("/", requireSignin, validateFriendRequest, isRequestValidated, acceptFriendRequest);
 
-router.delete("/:friend_id", requireSignin, unFriend);
+router.delete("/", requireSignin, validateFriendRequest, isRequestValidated, unFriend);
 
 module.exports = router;
 

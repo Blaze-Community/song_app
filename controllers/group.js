@@ -7,9 +7,23 @@ exports.getGroups = async (req, res) => {
         const { user_id } = req.user;
 
         const response = await db.query(
-            `SELECT group_id
-             from group_user
-             where user_id = $1;`,
+            `SELECT group_id, artist,
+             CASE
+                WHEN type = 'single' THEN (
+                    SELECT name 
+                    FROM users 
+                    WHERE user_id = (
+                        SELECT user_id 
+                        FROM group_user 
+                        WHERE user_id <> $1 AND group_id = g.group_id
+                    )
+                )
+                ELSE name
+             END
+             as name
+             FROM group_user
+             NATURAL JOIN group_name AS g
+             WHERE user_id = $1;`,
             [user_id]
         );
 
@@ -22,6 +36,7 @@ exports.getGroups = async (req, res) => {
         });
 
     } catch (e) {
+        console.log(e.toString());
         return res.status(400).json({
             error: e,
             success: false,
@@ -35,9 +50,7 @@ exports.createPersonalChat = async (req, res) => {
     try {
         const { user_id } = req.user;
 
-        const { id } = req.params;
-
-        const friend_id = parseInt(id);
+        const { friend_id } = req.body;
 
         if (user_id === friend_id) {
             return res.status(400).json({
@@ -62,8 +75,6 @@ exports.createPersonalChat = async (req, res) => {
             });
         }
 
-        console.log(rows);
-
         const response = await db.query(
             `INSERT INTO group_name
              (type) 
@@ -76,7 +87,7 @@ exports.createPersonalChat = async (req, res) => {
         await db.query(
             `INSERT INTO group_user 
              VALUES ($1, $2);`,
-            [id, group[0].group_id]
+            [friend_id, group[0].group_id]
         );
 
         await db.query(
@@ -125,8 +136,6 @@ exports.createGroup = async (req, res) => {
 
         const group = response.rows;
 
-        console.log(group);
-
         await db.query(
             `INSERT INTO group_user 
              values ($1, $2);`,
@@ -154,21 +163,14 @@ exports.addMember = async (req, res) => {
 
         const { user_id } = req.user;
 
-        const { friend_id, group_id } = req.params;
-
-        const frnd_id = parseInt(friend_id);
-        const grp_id = parseInt(group_id);
-
-        console.log(user_id, frnd_id);
+        const { friend_id, group_id } = req.body;
 
         const { rows } = await db.query(
             `SELECT *
              FROM friends
              WHERE user_id = $1 AND friend_id = $2 AND status = '1';`,
-            [user_id, frnd_id]
+            [user_id, friend_id]
         );
-
-        console.log(rows);
 
         if (rows.length === 0) {
             return res.status(400).json({
@@ -181,7 +183,7 @@ exports.addMember = async (req, res) => {
             `SELECT *
              FROM group_name
              WHERE group_id = $1 AND type = 'group';`,
-            [grp_id]
+            [group_id]
         );
 
         if (group.rows.length === 0) {
@@ -195,7 +197,7 @@ exports.addMember = async (req, res) => {
             `SELECT *
              FROM group_user 
              WHERE user_id = $1 AND group_id = $2;`,
-            [frnd_id, grp_id]
+            [friend_id, group_id]
         );
 
         if (response.rows.length !== 0) {
@@ -208,7 +210,7 @@ exports.addMember = async (req, res) => {
         await db.query(
             `INSERT INTO group_user 
              VALUES ($1, $2);`,
-            [frnd_id, grp_id]
+            [friend_id, group_id]
         );
 
         return res.status(200).json({
@@ -244,15 +246,13 @@ exports.leaveGroup = async (req, res) => {
 
         const { user_id } = req.user;
 
-        const { group_id } = req.params;
-
-        const grp_id = parseInt(group_id);
+        const { group_id } = req.body;
 
         const group = await db.query(
             `SELECT *
              from group_name
              where group_id = $1 AND type = 'group';`,
-            [grp_id]
+            [group_id]
         );
 
         if (group.rows.length === 0) {
@@ -300,20 +300,17 @@ exports.leaveGroup = async (req, res) => {
 exports.updateGroup = async (req, res) => {
 
     try {
-        const { group_id } = req.params;
-
-        const grp_id = parseInt(group_id);
-
         const {
             name,
-            artist
+            artist,
+            group_id
         } = req.body;
 
         const group = await db.query(
             `SELECT *
              FROM group_name
              WHERE group_id = $1 AND type = 'group';`,
-            [grp_id]
+            [group_id]
         );
 
         if (group.rows.length === 0) {
@@ -327,7 +324,7 @@ exports.updateGroup = async (req, res) => {
             `UPDATE group_name
              SET name = $1, artist = $2
              WHERE group_id = $3;`,
-            [name, artist, grp_id]
+            [name, artist, group_id]
         );
 
         return res.status(200).json({
@@ -347,10 +344,9 @@ exports.updateGroup = async (req, res) => {
 exports.deleteGroup = async (req, res) => {
 
     try {
+        const { group_id } = req.body;
 
-        const { group_id } = req.params;
-
-        const { id } = req.user;
+        const { user_id } = req.user;
 
         const group = await db.query(
             `SELECT *
@@ -373,7 +369,7 @@ exports.deleteGroup = async (req, res) => {
             [group_id]
         );
 
-        if (response.rows.length === 1 && response.rows[0].user_id === id) {
+        if (response.rows.length === 1 && response.rows[0].user_id === user_id) {
 
             await db.query(
                 `DELETE

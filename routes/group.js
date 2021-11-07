@@ -5,7 +5,6 @@ const {
     createPersonalChat,
     createGroup,
     addMember,
-    removeMember,
     leaveGroup,
     updateGroup,
     deleteGroup
@@ -15,25 +14,30 @@ const { requireSignin } = require("../middlewares/auth");
 
 const {
     isRequestValidated,
-    validateGroupRequest
+    validatePersonalChatRequest,
+    validateAddMemberRequest,
+    validateGroupRequest,
+    validateGroupUpdateRequest,
+    validateGroupLeaveRequest,
+    validateGroupDeleteRequest
 } = require("../validators/group");
 
 const router = express.Router();
 
 router.get("/", requireSignin, getGroups);
 
-router.post("/:id/personal", requireSignin, createPersonalChat);
+router.post("/personal", requireSignin, validatePersonalChatRequest, isRequestValidated, createPersonalChat);
 
 router.post("/", requireSignin, validateGroupRequest, isRequestValidated, createGroup);
 
-router.put("/:friend_id/add/:group_id", requireSignin, addMember);
+router.put("/add", requireSignin, validateAddMemberRequest, isRequestValidated, addMember);
 
 // router.put("/:user_id/remove", requireSignin, removeMember);
 
-router.put("/:group_id/leave", requireSignin, leaveGroup);
+router.put("/leave", requireSignin, validateGroupLeaveRequest, isRequestValidated, leaveGroup);
 
-router.put("/:group_id", requireSignin, validateGroupRequest, isRequestValidated, updateGroup);
+router.put("/", requireSignin, validateGroupUpdateRequest, isRequestValidated, updateGroup);
 
-router.delete("/:group_id", requireSignin, deleteGroup);
+router.delete("/", requireSignin, validateGroupDeleteRequest, isRequestValidated, deleteGroup);
 
 module.exports = router;
