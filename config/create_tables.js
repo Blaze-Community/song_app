@@ -77,7 +77,7 @@ const create_tables = async () => {
             `CREATE TABLE message(
                 from_user integer,
                 to_user integer,
-                msg_id integer,
+                msg_id SERIAL,
                 body text NOT NULL,
                 subject text NOT NULL,
                 CONSTRAINT MSG_PK PRIMARY KEY(msg_id),
@@ -91,6 +91,8 @@ const create_tables = async () => {
                 user_id integer,
                 msg_id integer,
                 CONSTRAINT DMS_PK PRIMARY KEY(user_id,msg_id),
+                CONSTRAINT USR_FK FOREIGN KEY (user_id) REFERENCES users(user_id),
+                CONSTRAINT MSG_FK FOREIGN KEY (msg_id) REFERENCES message(msg_id)
             );`
         );
 
