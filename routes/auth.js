@@ -27,13 +27,13 @@ router.post("/register", validateRegisterRequest, isRequestValidated, register);
 
 router.post("/refresh", validateRefreshRequest, isRequestValidated, refresh);
 
-router.patch("/changepassword", requireSignin, changePassword);
+router.put("/changepassword", requireSignin, changePassword);
 
 router.post("/requestResetPassword", requestResetPassword);
 
 router.get("/resetPassword/:id/:token", resetPasswordForm);
 
 // add validator for this
-router.patch("/resetPassword/:id", resetPassword);
+router.post("/resetPassword/:id", resetPassword);
 
 module.exports = router;

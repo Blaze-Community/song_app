@@ -34,7 +34,7 @@ exports.register = async (req, res) => {
         }
 
         const _password = await hashPassword(password);
-
+        
         const response = await db.query(
             `INSERT INTO users
              (name, email, address, dob, password)

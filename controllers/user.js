@@ -33,13 +33,44 @@ exports.getUser = async (req, res) => {
             msg: "Something Went Wrong!",
         });
     }
-};
+};2
+exports.getCurrentUser = async (req, res) => {
 
+    try {
+        const { user_id } = req.user;
+
+        const { rows } = await db.query(
+            `SELECT user_id, name, dob, email, address 
+             from users 
+             where user_id = $1;`,
+            [user_id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(400).json({
+                success: false,
+                msg: "No such user exists!",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            user: rows[0],
+            msg: "User fetched Successfully!",
+        });
+
+    } catch (e) {
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
+    }
+};
 exports.updateUser = async (req, res) => {
 
     try {
-
-        const { user_id } = req.user;
+         const { user_id } = req.user;
 
         const {
             name,
