@@ -1,6 +1,6 @@
 const express = require("express");
 const { reset } = require("nodemon");
-const { allSongs , addToFav , removeFromFav , allFavSongs, songDetail} = require("../controllers/song");
+const { allSongs , addToFav , removeFromFav , allFavSongs, songDetail, isFav} = require("../controllers/song");
 const { requireSignin } = require("../middlewares/auth");
 const {
     validateSongRequest,
@@ -10,9 +10,10 @@ const {
 const router = express.Router();
 
 router.get("/allSongs",allSongs);
-router.get("/:id",songDetail);
+router.get("/isFav/:id",requireSignin,isFav);
 router.get("/allFavSongs",requireSignin, allFavSongs);
 router.post("/addToFav",requireSignin, validateSongRequest, addToFav);
-router.delete("/removeFromFav",requireSignin, removeFromFav);
+router.delete("/removeFromFav",requireSignin,validateSongRequest, removeFromFav);
+router.get("/:id",songDetail);
 
 module.exports = router;
