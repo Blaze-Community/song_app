@@ -2,6 +2,7 @@ const express = require("express");
 
 const {
     getUser,
+    getCurrentUser,
     updateUser,
     deleteUser
 } = require("../controllers/user");
@@ -17,7 +18,9 @@ const router = express.Router();
 
 router.get("/:id", getUser);
 
-router.patch("/", requireSignin, validateUserRequest, isRequestValidated, updateUser);
+router.get("/", requireSignin, getCurrentUser);
+
+router.put("/", requireSignin, validateUserRequest, isRequestValidated, updateUser);
 
 router.delete("/", requireSignin, deleteUser);
 

@@ -44,8 +44,8 @@ const create_tables = async () => {
         await pool.query(
             `CREATE TABLE album(
                 name text NOT NULL,
-                album_id SERIAL,
                 artist_id integer NOT NULL,
+                album_id SERIAL,
                 CONSTRAINT ALBUM_PK PRIMARY KEY(album_id),
                 CONSTRAINT ARTIST_FK FOREIGN KEY (artist_id) REFERENCES artist(artist_id)
             );`
@@ -55,8 +55,8 @@ const create_tables = async () => {
             `CREATE TABLE songs(
                 title text NOT NULL,
                 year date NOT NULL,
-                song_id SERIAL,
                 album_id integer NOT NULL,
+                song_id SERIAL,
                 CONSTRAINT SONG_PK PRIMARY KEY(song_id),
                 CONSTRAINT ALBUM_FK FOREIGN KEY (album_id) REFERENCES album(album_id),
                 CONSTRAINT SONG_UK UNIQUE (year , title)

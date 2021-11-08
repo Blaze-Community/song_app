@@ -3,8 +3,9 @@ const db = require("../config/db");
 exports.allSongs = async(req,res) => {
 	try {
 		const { rows } = await db.query(
-            `SELECT * 
-             from songs;`
+            `SELECT songs.song_id,artist.name as artist ,title,year,album.name as album
+             from songs,artist,album where songs.album_id = album.album_id 
+             and album.artist_id = artist.artist_id ;`
         );
         return res.status(200).json({
             success: true,
@@ -13,6 +14,31 @@ exports.allSongs = async(req,res) => {
         });
 	}
 	catch (e) {
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
+    }
+}
+
+exports.songDetail = async(req,res) => {
+    try {
+        const song_id = req.params.id;
+
+        const { rows } = await db.query(
+            `SELECT songs.song_id,artist.name as artist ,title,year,album.name as album
+             from songs,artist,album where songs.album_id = album.album_id 
+             and album.artist_id = artist.artist_id and songs.song_id = $1;`,
+             [ song_id ]
+        );
+        return res.status(200).json({
+            success: true,
+            msg: "Song Fetch Successfully!",
+            song: rows[0],
+        });
+    }
+    catch (e) {
         return res.status(400).json({
             error: e,
             success: false,
