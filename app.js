@@ -12,6 +12,8 @@ const user = require("./routes/user");
 const friend = require("./routes/friend");
 const group = require("./routes/group");
 const song = require("./routes/song");
+const artist = require("./routes/artist");
+const db = require("./config/db");
 
 const app = express();
 
@@ -41,6 +43,16 @@ app.use("/api/user", user);
 app.use("/api/friends", friend);
 app.use("/api/songs", song);
 app.use("/api/groups", group);
+app.use("/api/artists", artist);
+
+// db.query(`select * from songs;`,(err,data)=>{
+//     if(err){
+//         console.log(err);
+//     }
+//     else{
+//         console.log(data);
+//     }
+// })
 
 app.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
