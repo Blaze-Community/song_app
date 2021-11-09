@@ -24,6 +24,10 @@ exports.validateGroupLeaveRequest = [
     check("group_id").notEmpty().withMessage("Group id must not be empty"),
 ];
 
+exports.validateGroupJoinRequest = [
+    check("group_id").notEmpty().withMessage("Group id must not be empty"),
+];
+
 exports.validateGroupDeleteRequest = [
     check("group_id").notEmpty().withMessage("Group id must not be empty"),
 ];

@@ -9,6 +9,43 @@ exports.getGroups = async (req, res) => {
         const response = await db.query(
             `SELECT group_id, artist,
              CASE
+                WHEN type = 'group' THEN name
+                ELSE NULL
+             END
+             as name
+             FROM group_user
+             NATURAL JOIN group_name AS g
+             WHERE user_id = $1 AND type = 'group';`,
+            [user_id]
+        );
+
+        const groups = response.rows;
+
+        return res.status(200).json({
+            success: true,
+            groups: groups,
+            msg: "Groups fetched successfully!",
+        });
+
+    } catch (e) {
+        console.log(e.toString());
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
+    }
+};
+
+exports.getChats = async (req, res) => {
+
+    try {
+
+        const { user_id } = req.user;
+
+        const response = await db.query(
+            `SELECT group_id, artist,
+             CASE
                 WHEN type = 'single' THEN (
                     SELECT name 
                     FROM users 
@@ -23,7 +60,7 @@ exports.getGroups = async (req, res) => {
              as name
              FROM group_user
              NATURAL JOIN group_name AS g
-             WHERE user_id = $1;`,
+             WHERE user_id = $1 AND type = 'single';`,
             [user_id]
         );
 
@@ -157,27 +194,13 @@ exports.createGroup = async (req, res) => {
     }
 };
 
-exports.addMember = async (req, res) => {
+exports.joinGroup = async (req, res) => {
 
     try {
 
         const { user_id } = req.user;
 
-        const { friend_id, group_id } = req.body;
-
-        const { rows } = await db.query(
-            `SELECT *
-             FROM friends
-             WHERE user_id = $1 AND friend_id = $2 AND status = '1';`,
-            [user_id, friend_id]
-        );
-
-        if (rows.length === 0) {
-            return res.status(400).json({
-                success: false,
-                msg: "This user is not your friend or does not exist!",
-            });
-        }
+        const { group_id } = req.body;
 
         const group = await db.query(
             `SELECT *
@@ -197,7 +220,7 @@ exports.addMember = async (req, res) => {
             `SELECT *
              FROM group_user 
              WHERE user_id = $1 AND group_id = $2;`,
-            [friend_id, group_id]
+            [user_id, group_id]
         );
 
         if (response.rows.length !== 0) {
@@ -210,7 +233,7 @@ exports.addMember = async (req, res) => {
         await db.query(
             `INSERT INTO group_user 
              VALUES ($1, $2);`,
-            [friend_id, group_id]
+            [user_id, group_id]
         );
 
         return res.status(200).json({
@@ -226,19 +249,6 @@ exports.addMember = async (req, res) => {
         });
     }
 };
-
-// exports.removeMember = async (req, res) => {
-
-//     try {
-
-//     } catch (e) {
-//         return res.status(400).json({
-//             error: e,
-//             success: false,
-//             msg: "Something Went Wrong!",
-//         });
-//     }
-// };
 
 exports.leaveGroup = async (req, res) => {
 
