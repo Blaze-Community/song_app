@@ -228,7 +228,7 @@ exports.getFriends = async (req, res) => {
         const { user_id } = req.user;
 
         const response = await db.query(
-            `SELECT user_id, name
+            `SELECT user_id, name, address
              from users
              where user_id IN (
                  SELECT friend_id
@@ -242,7 +242,7 @@ exports.getFriends = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            users: friends,
+            usersList: friends,
             msg: "Friends fetched successfully!",
         });
 
@@ -262,7 +262,7 @@ exports.getFriendRequests = async (req, res) => {
         const { user_id } = req.user;
 
         const response = await db.query(
-            `SELECT user_id, name
+            `SELECT user_id, name, address
              from users
              where user_id IN (
                  SELECT friend_id
@@ -277,7 +277,7 @@ exports.getFriendRequests = async (req, res) => {
         return res.status(200).json({
             success: true,
             requests: friend_requests,
-            msg: "Friends fetched successfully!",
+            msg: "Friend Request fetched successfully!",
         });
 
     } catch (e) {
