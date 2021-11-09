@@ -7,15 +7,10 @@ exports.getGroups = async (req, res) => {
         const { user_id } = req.user;
 
         const response = await db.query(
-            `SELECT group_id, artist,
-             CASE
-                WHEN type = 'group' THEN name
-                ELSE NULL
-             END
-             as name
-             FROM group_user
-             NATURAL JOIN group_name AS g
-             WHERE user_id = $1 AND type = 'group';`,
+            `SELECT group_user.group_id as group_id, artist,name
+             FROM group_user, group_name
+             WHERE group_user.group_id = group_name.group_id 
+             and user_id = $1 AND type = 'group';`,
             [user_id]
         );
 
@@ -23,7 +18,7 @@ exports.getGroups = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            groups: groups,
+            groupsList: groups,
             msg: "Groups fetched successfully!",
         });
 

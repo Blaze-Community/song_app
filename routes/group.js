@@ -25,7 +25,7 @@ const {
 
 const router = express.Router();
 
-router.get("/getGroups", requireSignin, getGroups);
+router.get("/", requireSignin, getGroups);
 
 router.get("/getChats", requireSignin, getChats);
 

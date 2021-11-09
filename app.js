@@ -13,6 +13,8 @@ const friend = require("./routes/friend");
 const group = require("./routes/group");
 const song = require("./routes/song");
 const artist = require("./routes/artist");
+const search = require("./routes/search");
+const db = require("./config/db");
 
 const app = express();
 
@@ -44,6 +46,7 @@ app.use("/api/songs", song);
 app.use("/api/groups", group);
 app.use("/api/message", group);
 app.use("/api/artists", artist);
+app.use("/api/search", search);
 
 
 app.listen(PORT, () => {
