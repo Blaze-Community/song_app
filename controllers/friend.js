@@ -288,3 +288,74 @@ exports.getFriendRequests = async (req, res) => {
         });
     }
 };
+
+exports.rejectFriendRequest = async (req, res) => {
+
+    try {
+
+        const { user_id } = req.user;
+        const { friend_id } = req.body;
+
+        const { rows } = await db.query(
+            `SELECT *
+             from users 
+             where user_id = $1;`,
+            [friend_id]
+        );
+
+        if (rows.length === 0) {
+            return res.status(400).json({
+                success: false,
+                msg: "No such user exists!",
+            });
+        }
+
+        const response = await db.query(
+            `SELECT status
+             from friends
+             where user_id = $1 AND friend_id = $2;`,
+            [user_id, friend_id]
+        );
+
+        const friends = response.rows;
+
+        if (friends.length === 0) {
+            return res.status(400).json({
+                success: false,
+                msg: "This user has not sent you a friend request!",
+            });
+        }
+
+        if (friends[0].status === '1') {
+            return res.status(400).json({
+                success: false,
+                msg: "You are already friends with this user!",
+            });
+        }
+        else if (friends[0].status === '0') {
+            return res.status(400).json({
+                success: false,
+                msg: "Please wait for the user to accept your friend request!",
+            });
+        }
+
+        await db.query(
+            `DELETE FROM 
+             friends
+             WHERE (user_id = $1 AND friend_id = $2) OR (user_id = $2 AND friend_id = $1);`,
+            [user_id, friend_id]
+        );
+
+        return res.status(200).json({
+            success: true,
+            msg: "Friend Request rejected successfully!",
+        });
+
+    } catch (e) {
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
+    }
+};
