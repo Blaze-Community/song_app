@@ -24,11 +24,11 @@ const {
 
 const router = express.Router();
 
-router.get("/", requireSignin, getGroups);
+router.get("/getGroups", requireSignin, getGroups);
 
 router.post("/personal", requireSignin, validatePersonalChatRequest, isRequestValidated, createPersonalChat);
 
-router.post("/", requireSignin, validateGroupRequest, isRequestValidated, createGroup);
+router.post("/createGroup", requireSignin, validateGroupRequest, isRequestValidated, createGroup);
 
 router.put("/add", requireSignin, validateAddMemberRequest, isRequestValidated, addMember);
 
@@ -36,8 +36,8 @@ router.put("/add", requireSignin, validateAddMemberRequest, isRequestValidated, 
 
 router.put("/leave", requireSignin, validateGroupLeaveRequest, isRequestValidated, leaveGroup);
 
-router.put("/", requireSignin, validateGroupUpdateRequest, isRequestValidated, updateGroup);
+router.put("/updateGroup", requireSignin, validateGroupUpdateRequest, isRequestValidated, updateGroup);
 
-router.delete("/", requireSignin, validateGroupDeleteRequest, isRequestValidated, deleteGroup);
+router.delete("/deleteGroup", requireSignin, validateGroupDeleteRequest, isRequestValidated, deleteGroup);
 
 module.exports = router;
