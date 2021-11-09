@@ -3,6 +3,7 @@ const express = require("express");
 const {
     sendFriendRequest,
     acceptFriendRequest,
+    rejectFriendRequest,
     unFriend,
     getFriends,
     getFriendRequests
@@ -22,6 +23,8 @@ router.get("/getFriendRequests", requireSignin, getFriendRequests);
 router.get("/getFriends", requireSignin, getFriends);
 
 router.post("/sendFriendRequest", requireSignin, validateFriendRequest, isRequestValidated, sendFriendRequest);
+
+router.put("/rejectFriendRequest", requireSignin, validateFriendRequest, isRequestValidated, rejectFriendRequest);
 
 router.put("/acceptFriendRequest", requireSignin, validateFriendRequest, isRequestValidated, acceptFriendRequest);
 
