@@ -33,7 +33,7 @@ exports.getUser = async (req, res) => {
             msg: "Something Went Wrong!",
         });
     }
-};2
+};
 exports.getCurrentUser = async (req, res) => {
 
     try {
