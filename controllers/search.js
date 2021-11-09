@@ -98,7 +98,7 @@ exports.getUsers = async (req,res) => {
 		const search = '%' + req.query.name + '%';
 		try {
 			const { rows } = await db.query(
-	            `SELECT name, dob, email, address 
+	            `SELECT user_id,name, dob, email, address 
 	             from users 
 	             where LOWER(name) LIKE LOWER($1);`,
 	             [search]
@@ -120,7 +120,7 @@ exports.getUsers = async (req,res) => {
 	else{
 		try {
 			const { rows } = await db.query(
-	            `SELECT name, dob, email, address 
+	            `SELECT user_id,name, dob, email, address 
 	             from users;`,
 	        );
 	        return res.status(200).json({
