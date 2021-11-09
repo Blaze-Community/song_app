@@ -11,7 +11,7 @@ exports.requireSignin = (req, res, next) => {
                     req.user = data.user;
                     next();
                 } else if (err.message === "jwt expired") {
-                    return res.json({
+                    return res.status(400).json({
                         success: false,
                         msg: "Access token expired",
                     });

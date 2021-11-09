@@ -18,17 +18,17 @@ const {
 
 const router = express.Router();
 
-router.get("/requests", requireSignin, getFriendRequests);
+router.get("/getFriendRequests", requireSignin, getFriendRequests);
 
-router.get("/", requireSignin, getFriends);
+router.get("/getFriends", requireSignin, getFriends);
 
-router.post("/", requireSignin, validateFriendRequest, isRequestValidated, sendFriendRequest);
+router.post("/sendFriendRequest", requireSignin, validateFriendRequest, isRequestValidated, sendFriendRequest);
 
-router.put("/reject", requireSignin, validateFriendRequest, isRequestValidated, rejectFriendRequest);
+router.put("/rejectFriendRequest", requireSignin, validateFriendRequest, isRequestValidated, rejectFriendRequest);
 
-router.put("/", requireSignin, validateFriendRequest, isRequestValidated, acceptFriendRequest);
+router.put("/acceptFriendRequest", requireSignin, validateFriendRequest, isRequestValidated, acceptFriendRequest);
 
-router.delete("/", requireSignin, validateFriendRequest, isRequestValidated, unFriend);
+router.delete("/unFriend", requireSignin, validateFriendRequest, isRequestValidated, unFriend);
 
 module.exports = router;
 

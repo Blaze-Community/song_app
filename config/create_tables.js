@@ -44,8 +44,8 @@ const create_tables = async () => {
         await pool.query(
             `CREATE TABLE album(
                 name text NOT NULL,
-                album_id SERIAL,
                 artist_id integer NOT NULL,
+                album_id SERIAL,
                 CONSTRAINT ALBUM_PK PRIMARY KEY(album_id),
                 CONSTRAINT ARTIST_FK FOREIGN KEY (artist_id) REFERENCES artist(artist_id)
             );`
@@ -55,8 +55,8 @@ const create_tables = async () => {
             `CREATE TABLE songs(
                 title text NOT NULL,
                 year date NOT NULL,
-                song_id SERIAL,
                 album_id integer NOT NULL,
+                song_id SERIAL,
                 CONSTRAINT SONG_PK PRIMARY KEY(song_id),
                 CONSTRAINT ALBUM_FK FOREIGN KEY (album_id) REFERENCES album(album_id),
                 CONSTRAINT SONG_UK UNIQUE (year , title)
@@ -77,12 +77,22 @@ const create_tables = async () => {
             `CREATE TABLE message(
                 from_user integer,
                 to_user integer,
-                msg_id integer,
+                msg_id SERIAL,
                 body text NOT NULL,
                 subject text NOT NULL,
                 CONSTRAINT MSG_PK PRIMARY KEY(msg_id),
                 CONSTRAINT FRM_FK FOREIGN KEY (from_user) REFERENCES users(user_id),
                 CONSTRAINT TO_FK FOREIGN KEY (to_user) REFERENCES group_name(group_id)
+            );`
+        );
+        
+        await pool.query(
+            `CREATE TABLE deleted_message(
+                user_id integer,
+                msg_id integer,
+                CONSTRAINT DMS_PK PRIMARY KEY(user_id,msg_id),
+                CONSTRAINT USR_FK FOREIGN KEY (user_id) REFERENCES users(user_id),
+                CONSTRAINT MSG_FK FOREIGN KEY (msg_id) REFERENCES message(msg_id)
             );`
         );
 
