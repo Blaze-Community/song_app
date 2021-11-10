@@ -7,12 +7,18 @@ const {
 } = require("../controllers/message");
 
 const { requireSignin } = require("../middlewares/auth");
+const {
+    isRequestValidated,
+    validateMessageUpdateRequest,
+    validateMessageSentRequest,
+} = require("../validators/message");
 
-router.get("/getMessages", requireSignin, getMessages);
-router.post("/sendMessage", requireSignin, sendMessage);
-router.update("/updateMessage",requireSignin, updateMessage);
-router.post("/deleteMessage", requireSignin, deleteMessage);
 
 const router = express.Router();
+
+router.get("/:id", requireSignin, getMessages);
+router.post("/", requireSignin,validateMessageSentRequest,isRequestValidated,sendMessage);
+router.put("/",requireSignin,validateMessageUpdateRequest,isRequestValidated,updateMessage);
+router.delete("/", requireSignin, deleteMessage);
 
 module.exports = router;

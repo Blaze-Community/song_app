@@ -8,7 +8,8 @@ const {
     joinGroup,
     leaveGroup,
     updateGroup,
-    deleteGroup
+    deleteGroup,
+    groupInfo
 } = require("../controllers/group");
 
 const { requireSignin } = require("../middlewares/auth");
@@ -26,19 +27,17 @@ const {
 const router = express.Router();
 
 router.get("/", requireSignin, getGroups);
+router.post("/", requireSignin, validateGroupRequest, isRequestValidated, createGroup);
+router.put("/", requireSignin, validateGroupUpdateRequest, isRequestValidated, updateGroup);
+router.delete("/", requireSignin, validateGroupDeleteRequest, isRequestValidated, deleteGroup);
+
+router.put("/join", requireSignin, validateGroupJoinRequest, isRequestValidated, joinGroup);
+router.put("/leave", requireSignin, validateGroupLeaveRequest, isRequestValidated, leaveGroup);
 
 router.get("/getChats", requireSignin, getChats);
 
 router.post("/personal", requireSignin, validatePersonalChatRequest, isRequestValidated, createPersonalChat);
 
-router.post("/createGroup", requireSignin, validateGroupRequest, isRequestValidated, createGroup);
-
-router.put("/joinGroup", requireSignin, validateGroupJoinRequest, isRequestValidated, joinGroup);
-
-router.put("/leave", requireSignin, validateGroupLeaveRequest, isRequestValidated, leaveGroup);
-
-router.put("/updateGroup", requireSignin, validateGroupUpdateRequest, isRequestValidated, updateGroup);
-
-router.delete("/deleteGroup", requireSignin, validateGroupDeleteRequest, isRequestValidated, deleteGroup);
+router.get("/:id", requireSignin, groupInfo);
 
 module.exports = router;
