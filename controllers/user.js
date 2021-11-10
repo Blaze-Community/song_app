@@ -7,7 +7,7 @@ exports.getUser = async (req, res) => {
         const { id } = req.params;
 
         const { rows } = await db.query(
-            `SELECT name, dob, email, address 
+            `SELECT user_id, name, dob, email, address 
              from users 
              where user_id = $1;`,
             [id]
