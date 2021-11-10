@@ -2,6 +2,7 @@ const express = require("express");
 
 const {
     getGroups,
+    getGroupMembers,
     getChats,
     createPersonalChat,
     createGroup,
@@ -28,6 +29,8 @@ const router = express.Router();
 router.get("/", requireSignin, getGroups);
 
 router.get("/getChats", requireSignin, getChats);
+
+router.get("/getGroupMembers", getGroupMembers);
 
 router.post("/personal", requireSignin, validatePersonalChatRequest, isRequestValidated, createPersonalChat);
 
