@@ -1,5 +1,38 @@
 const db = require("../config/db");
 
+exports.groupInfo = async (req, res) => {
+    try {
+        const group_id = req.params.id;
+
+        const groupMembers = await db.query(
+            `SELECT users.user_id,users.name, dob, email, address FROM users INNER JOIN group_user
+            ON group_user.user_id = users.user_id WHERE group_user.group_id = $1;`,
+            [group_id]
+        );
+
+        const groupDetails = await db.query(
+            `SELECT group_id, name, artist
+             from group_name where group_id = $1;`,
+            [group_id]
+        );
+
+        return res.status(200).json({
+            success: true,
+            groupDetails : groupDetails.rows[0],
+            groupMembers: groupMembers.rows,
+            msg: "Group fetched successfully!",
+        });
+    }
+    catch(e)
+    {
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
+    }
+}
+
 exports.getGroups = async (req, res) => {
 
     try {
@@ -233,7 +266,7 @@ exports.joinGroup = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            msg: "Added user successfully!",
+            msg: "Join Group successfully!",
         });
 
     } catch (e) {

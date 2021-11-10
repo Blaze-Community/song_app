@@ -3,7 +3,7 @@ const db = require("../config/db")
 exports.getMessages = async (req,res) => {
     try{
         const { user_id } = req.user;
-        const { group_id } = req.body;
+        const { group_id } = req.params.id;
 
         const response = await db.query(
             `SELECT message.user_id, message.body FROM message 
