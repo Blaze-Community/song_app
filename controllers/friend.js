@@ -89,6 +89,14 @@ exports.acceptFriendRequest = async (req, res) => {
         const { user_id } = req.user;
         const { friend_id } = req.body;
 
+
+        if (user_id === friend_id) {
+            return res.status(400).json({
+                success: false,
+                msg: "Something went wrong!",
+            });
+        }
+
         const { rows } = await db.query(
             `SELECT *
              from users 
@@ -111,8 +119,6 @@ exports.acceptFriendRequest = async (req, res) => {
         );
 
         const friends = response.rows;
-
-        console.log(friends);
 
         if (friends.length === 0) {
             return res.status(400).json({
@@ -141,9 +147,30 @@ exports.acceptFriendRequest = async (req, res) => {
             [user_id, friend_id]
         );
 
+        const resp = await db.query(
+            `INSERT INTO group_name
+             (type) 
+             VALUES ('single')
+             RETURNING *;`
+        );
+
+        const group = resp.rows;
+
+        await db.query(
+            `INSERT INTO group_user 
+             VALUES ($1, $2);`,
+            [friend_id, group[0].group_id]
+        );
+
+        await db.query(
+            `INSERT INTO group_user 
+             VALUES ($1, $2);`,
+            [user_id, group[0].group_id]
+        );
+
         return res.status(200).json({
             success: true,
-            msg: "Friend Request accepted successfully!",
+            msg: "Accepted friend request successfully!"
         });
 
     } catch (e) {

@@ -18,13 +18,12 @@ exports.groupInfo = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            groupDetails : groupDetails.rows[0],
+            groupDetails: groupDetails.rows[0],
             groupMembers: groupMembers.rows,
             msg: "Group fetched successfully!",
         });
     }
-    catch(e)
-    {
+    catch (e) {
         return res.status(400).json({
             error: e,
             success: false,
@@ -436,6 +435,39 @@ exports.deleteGroup = async (req, res) => {
         }
 
     } catch (e) {
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
+    }
+};
+
+exports.getGroupId = async (req, res) => {
+
+    try {
+
+        const { user_id } = req.user;
+
+        const { friend_id } = req.params;
+
+        const response = await db.query(
+            `SELECT group_id from group_user where user_id = $1
+             INTERSECT
+             SELECT group_id from group_user where user_id = $2;`,
+            [user_id, friend_id]
+        );
+
+        const group = response.rows;
+        console.log('hi');
+        return res.status(200).json({
+            success: true,
+            groupId: group[0].group_id,
+            msg: "Group Id fetched successfully!",
+        });
+
+    } catch (e) {
+        console.log(e.toString());
         return res.status(400).json({
             error: e,
             success: false,
