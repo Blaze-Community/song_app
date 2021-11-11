@@ -6,9 +6,9 @@ exports.getMessages = async (req,res) => {
         const { group_id } = req.params.id;
 
         const response = await db.query(
-            `SELECT message.from_user, message.body FROM message 
-            where to_user = $2 and 
-            (select COUNT(*) from deleted_message where deleted_message.from_user =  $1
+            `SELECT message.user_id, message.body FROM message 
+            where group_id = $2 and 
+            (select COUNT(*) from deleted_message where deleted_message.user_id =  $1
             and deleted_message.msg_id =  message.msg_id) = 0;`,
             [user_id,group_id]
         );
