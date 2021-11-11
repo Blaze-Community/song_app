@@ -65,31 +65,6 @@ exports.getGroups = async (req, res) => {
     }
 };
 
-exports.getGroupMembers = async (req, res) => {
-    try {
-        const {group_id} = req.body;
-        const response = await db.query(
-            `SELECT users.user_id, users.name, users.email FROM users INNER JOIN group_user
-            ON group_user.user_id = users.user_id WHERE group_user.group_id = $1;`,
-            [group_id]
-        )
-        console.log(response);
-        return res.status(200).json({
-            success: true,
-            groupMembers: response.rows,
-            msg: "Groups fetched successfully!",
-        });
-    }
-    catch(e)
-    {
-        return res.status(400).json({
-            error: e,
-            success: false,
-            msg: "Something Went Wrong!",
-        });
-    }
-}
-
 exports.getChats = async (req, res) => {
 
     try {
