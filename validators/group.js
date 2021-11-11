@@ -32,6 +32,10 @@ exports.validateGroupDeleteRequest = [
     check("group_id").notEmpty().withMessage("Group id must not be empty"),
 ];
 
+exports.validateGroupIdRequest = [
+    check("friend_id").notEmpty().withMessage("Friend id must not be empty"),
+];
+
 exports.isRequestValidated = (req, res, next) => {
     const errors = validationResult(req);
     if (errors.array().length > 0) {

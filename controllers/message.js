@@ -1,7 +1,7 @@
 const db = require("../config/db")
 
-exports.getMessages = async (req,res) => {
-    try{
+exports.getMessages = async (req, res) => {
+    try {
         const { user_id } = req.user;
         const { group_id } = req.params.id;
 
@@ -10,7 +10,7 @@ exports.getMessages = async (req,res) => {
             where to_user = $2 and 
             (select COUNT(*) from deleted_message where deleted_message.from_user =  $1
             and deleted_message.msg_id =  message.msg_id) = 0;`,
-            [user_id,group_id]
+            [user_id, group_id]
         );
 
         const messages = response.rows;
@@ -21,7 +21,7 @@ exports.getMessages = async (req,res) => {
             msg: "Message fetched successfully!",
         });
     }
-    catch(e){
+    catch (e) {
         return res.status(400).json({
             error: e,
             success: false,
@@ -30,15 +30,15 @@ exports.getMessages = async (req,res) => {
     }
 };
 
-exports.sendMessage = async (req , res) => {
-    try{
+exports.sendMessage = async (req, res) => {
+    try {
         const { user_id } = req.user;
-        const { group_id , body} = req.body;
+        const { group_id, body } = req.body;
 
         await db.query(
             `INSERT INTO message (from_user,to_user,body) 
             values($1,$2,$3);`,
-            [user_id,group_id,body]
+            [user_id, group_id, body]
         );
 
         return res.status(200).json({
@@ -46,7 +46,7 @@ exports.sendMessage = async (req , res) => {
             msg: "Message sent successfully!",
         });
     }
-    catch(e){
+    catch (e) {
         return res.status(400).json({
             error: e,
             success: false,
@@ -56,15 +56,15 @@ exports.sendMessage = async (req , res) => {
 };
 
 exports.updateMessage = async (req, res) => {
-    try{
+    try {
 
-        const {user_id} = req.user;
-        const {group_id , msg_id , body} = req.body;
+        const { user_id } = req.user;
+        const { group_id, msg_id, body } = req.body;
 
         await db.query(
             `UPDATE message SET body = $4
             WHERE user_id = $1 AND group_id = $2 AND msg_id = $3;`,
-            [user_id,group_id, msg_id ,body]
+            [user_id, group_id, msg_id, body]
         );
 
         return res.status(200).json({
@@ -72,8 +72,7 @@ exports.updateMessage = async (req, res) => {
             msg: "Message updated successfully!",
         });
 
-    } catch(e)
-    {
+    } catch (e) {
         return res.status(400).json({
             error: e,
             success: false,
@@ -81,15 +80,15 @@ exports.updateMessage = async (req, res) => {
         });
     }
 }
-exports.deleteMessage = async (req , res) => {
-    try{
+exports.deleteMessage = async (req, res) => {
+    try {
         const { user_id } = req.user;
         const { msg_id } = req.body;
 
         await db.query(
             `INSERT INTO deleted_message
             values($1,$2);`,
-            [user_id,msg_id]
+            [user_id, msg_id]
         );
 
         return res.status(200).json({
@@ -97,7 +96,7 @@ exports.deleteMessage = async (req , res) => {
             msg: "Message deleted successfully!",
         });
     }
-    catch(e){
+    catch (e) {
         return res.status(400).json({
             error: e,
             success: false,

@@ -14,23 +14,11 @@ const group = require("./routes/group");
 const song = require("./routes/song");
 const artist = require("./routes/artist");
 const search = require("./routes/search");
-const db = require("./config/db");
 
 const app = express();
-var http = require("http");
-var server = http.createServer(app);
+const http = require("http");
+const server = http.createServer(app);
 const io = require("socket.io")(server);
-
-var clients = {};
-
-io.on("connection" , (socket) => {  
-    socket.on("signin",(id) => {
-        clients[id] = socket;
-    })
-    socket.on("message", (msg) => {
-        console.log(msg);
-    })
-})
 
 app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 app.use(helmet());
@@ -61,6 +49,35 @@ app.use("/api/groups", group);
 app.use("/api/message", group);
 app.use("/api/artists", artist);
 app.use("/api/search", search);
+
+io.on("connection", (socket) => {
+    socket.on("openGroup", (group) => {
+        socket.join(group.group_id);
+        console.log(group.group_id);
+    });
+
+    socket.on("closeGroup", (group) => {
+        socket.leave(group.group_id);
+    });
+
+    socket.on("recieveMessage", async (message) => {
+
+        try {
+
+            await db.query(
+                `INSERT INTO message (from_user,to_user,body) 
+                values($1,$2,$3);`,
+                [message.user_id, message.group_id, message.body]
+            );
+
+            socket.to(message.to_user).emit("sendMessage", message);
+
+        } catch (e) {
+            socket.to(message.to_user).emit("errorMessage", message);
+        }
+
+    });
+});
 
 server.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
