@@ -2,7 +2,6 @@ const express = require("express");
 
 const {
     getGroups,
-    getGroupMembers,
     getChats,
     createPersonalChat,
     createGroup,
@@ -36,8 +35,6 @@ router.put("/join", requireSignin, validateGroupJoinRequest, isRequestValidated,
 router.put("/leave", requireSignin, validateGroupLeaveRequest, isRequestValidated, leaveGroup);
 
 router.get("/getChats", requireSignin, getChats);
-
-router.get("/getGroupMembers", getGroupMembers);
 
 router.post("/personal", requireSignin, validatePersonalChatRequest, isRequestValidated, createPersonalChat);
 
