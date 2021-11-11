@@ -17,6 +17,20 @@ const search = require("./routes/search");
 const db = require("./config/db");
 
 const app = express();
+var http = require("http");
+var server = http.createServer(app);
+const io = require("socket.io")(server);
+
+var clients = {};
+
+io.on("connection" , (socket) => {  
+    socket.on("signin",(id) => {
+        clients[id] = socket;
+    })
+    socket.on("message", (msg) => {
+        console.log(msg);
+    })
+})
 
 app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 app.use(helmet());
@@ -48,7 +62,6 @@ app.use("/api/message", group);
 app.use("/api/artists", artist);
 app.use("/api/search", search);
 
-
-app.listen(PORT, () => {
+server.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);
 });
