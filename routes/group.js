@@ -37,9 +37,10 @@ router.put("/join", requireSignin, validateGroupJoinRequest, isRequestValidated,
 router.put("/leave", requireSignin, validateGroupLeaveRequest, isRequestValidated, leaveGroup);
 
 router.get("/getChats", requireSignin, getChats);
-router.get("/getGroupId/:friend_id", requireSignin, validateGroupIdRequest, isRequestValidated, getGroupId);
 
 router.post("/personal", requireSignin, validatePersonalChatRequest, isRequestValidated, createPersonalChat);
+
+router.get("/getGroupId/:friend_id", requireSignin, validateGroupIdRequest, isRequestValidated, getGroupId);
 
 router.get("/:id", requireSignin, groupInfo);
 
