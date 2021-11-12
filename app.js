@@ -14,11 +14,15 @@ const group = require("./routes/group");
 const song = require("./routes/song");
 const artist = require("./routes/artist");
 const search = require("./routes/search");
+const message = require("./routes/message");
 
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
 const io = require("socket.io")(server);
+
+const db = require("./config/db");
+
 
 app.use(bodyParser.json({ type: "application/vnd.api+json" }));
 app.use(helmet());
@@ -46,14 +50,14 @@ app.use("/api/user", user);
 app.use("/api/friends", friend);
 app.use("/api/songs", song);
 app.use("/api/groups", group);
-app.use("/api/message", group);
+app.use("/api/messages", message);
 app.use("/api/artists", artist);
 app.use("/api/search", search);
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
+
     socket.on("openGroup", (group) => {
         socket.join(group.group_id);
-        console.log(group.group_id);
     });
 
     socket.on("closeGroup", (group) => {
@@ -63,21 +67,42 @@ io.on("connection", (socket) => {
     socket.on("recieveMessage", async (message) => {
 
         try {
+            const {
+                user_id,
+                group_id,
+                body
+            } = message;
 
-            await db.query(
-                `INSERT INTO message (from_user,to_user,body) 
-                values($1,$2,$3);`,
-                [message.user_id, message.group_id, message.body]
+            const res = await db.query(
+                `INSERT INTO message (from_user,to_user,body,subject) 
+                 values($1,$2,$3,'chatMessage') RETURNING *;`,
+                [user_id, group_id, body],
             );
-
-            socket.to(message.to_user).emit("sendMessage", message);
+            console.log(res.rows[0]);
+            socket.to(group_id).emit("sendMessage",res.rows[0]);
 
         } catch (e) {
-            socket.to(message.to_user).emit("errorMessage", message);
+            socket.to(message.group_id).emit("errorMessage", message);
         }
 
     });
 });
+
+// db.query(   `SELECT 
+//         message.msg_id as msg_id,
+//         message.to_user as to_user,
+//         message.from_user as from_user, 
+//         message.body as body FROM message 
+//         where to_user = 11 and from_user = 19 and
+//         (select COUNT(*) from deleted_message where deleted_message.user_id =  19
+//         and deleted_message.msg_id =  message.msg_id) = 0;`,(err,data)=>{
+//     if(err){
+//         console.log(err);
+//     }
+//     else{
+//         console.log(data);
+//     }
+// })
 
 server.listen(PORT, () => {
     console.log(`Server started on port ${PORT}`);

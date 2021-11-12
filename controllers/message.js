@@ -2,14 +2,18 @@ const db = require("../config/db")
 
 exports.getMessages = async (req, res) => {
     try {
-        const { user_id } = req.user;
-        const { group_id } = req.params.id;
+        const  { user_id }  = req.user;
+        const  group_id = req.params.id;
 
         const response = await db.query(
-            `SELECT message.from_user, message.body FROM message 
-            where to_user = $2 and 
-            (select COUNT(*) from deleted_message where deleted_message.from_user =  $1
-            and deleted_message.msg_id =  message.msg_id) = 0;`,
+           `SELECT 
+        message.msg_id as msg_id,
+        message.to_user as to_user,
+        message.from_user as from_user, 
+        message.body as body FROM message 
+        where to_user = $2 and
+        (select COUNT(*) from deleted_message where deleted_message.user_id =  $1
+        and deleted_message.msg_id =  message.msg_id) = 0;`,
             [user_id, group_id]
         );
 
@@ -17,7 +21,7 @@ exports.getMessages = async (req, res) => {
 
         return res.status(200).json({
             success: true,
-            message: messages,
+            messagesList: messages,
             msg: "Message fetched successfully!",
         });
     }
