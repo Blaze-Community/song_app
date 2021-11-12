@@ -446,20 +446,19 @@ exports.deleteGroup = async (req, res) => {
 exports.getGroupId = async (req, res) => {
 
     try {
-
         const { user_id } = req.user;
 
         const { friend_id } = req.params;
 
         const response = await db.query(
-            `SELECT group_id from group_user where user_id = $1
+            `SELECT group_id from group_name where group_id IN  
+            (SELECT group_id from group_user where user_id = $1
              INTERSECT
-             SELECT group_id from group_user where user_id = $2;`,
+             SELECT group_id from group_user where user_id = $2) and type = 'single';`,
             [user_id, friend_id]
         );
 
         const group = response.rows;
-        console.log('hi');
         return res.status(200).json({
             success: true,
             groupId: group[0].group_id,
@@ -467,7 +466,6 @@ exports.getGroupId = async (req, res) => {
         });
 
     } catch (e) {
-        console.log(e.toString());
         return res.status(400).json({
             error: e,
             success: false,
