@@ -13,7 +13,7 @@ exports.getMessages = async (req, res) => {
         message.body as body FROM message 
         where to_user = $2 and
         (select COUNT(*) from deleted_message where deleted_message.user_id =  $1
-        and deleted_message.msg_id =  message.msg_id) = 0;`,
+        and deleted_message.msg_id =  message.msg_id) = 0 ORDER BY message.msg_id;`,
             [user_id, group_id]
         );
 
@@ -62,13 +62,12 @@ exports.sendMessage = async (req, res) => {
 exports.updateMessage = async (req, res) => {
     try {
 
-        const { user_id } = req.user;
-        const { group_id, msg_id, body } = req.body;
+        const { msg_id, body } = req.body;
 
         await db.query(
-            `UPDATE message SET body = $4
-            WHERE user_id = $1 AND group_id = $2 AND msg_id = $3;`,
-            [user_id, group_id, msg_id, body]
+            `UPDATE message SET body = $2
+            WHERE msg_id = $1;`,
+            [msg_id, body]
         );
 
         return res.status(200).json({

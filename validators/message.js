@@ -1,7 +1,6 @@
 const { check, validationResult } = require('express-validator');
 
 exports.validateMessageUpdateRequest = [
-    check("group_id").notEmpty().withMessage("Group must not be empty"),
     check("body").notEmpty().withMessage("body must not be empty"),
     check("msg_id").notEmpty().withMessage("Message id must not be empty"),
 ];

@@ -79,7 +79,7 @@ io.on("connection", async (socket) => {
                 [user_id, group_id, body],
             );
             console.log(res.rows[0]);
-            socket.to(group_id).emit("sendMessage",res.rows[0]);
+            io.to(group_id).emit("sendMessage",res.rows[0]);
 
         } catch (e) {
             socket.to(message.group_id).emit("errorMessage", message);
