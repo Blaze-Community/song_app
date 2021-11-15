@@ -88,14 +88,7 @@ io.on("connection", async (socket) => {
     });
 });
 
-// db.query(   `SELECT 
-//         message.msg_id as msg_id,
-//         message.to_user as to_user,
-//         message.from_user as from_user, 
-//         message.body as body FROM message 
-//         where to_user = 11 and from_user = 19 and
-//         (select COUNT(*) from deleted_message where deleted_message.user_id =  19
-//         and deleted_message.msg_id =  message.msg_id) = 0;`,(err,data)=>{
+// db.query(   `SELECT * from group_name;`,(err,data)=>{
 //     if(err){
 //         console.log(err);
 //     }

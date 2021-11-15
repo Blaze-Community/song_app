@@ -34,6 +34,31 @@ exports.getUser = async (req, res) => {
         });
     }
 };
+
+exports.allUser = async (req, res) => {
+
+    try {
+
+        const { rows } = await db.query(
+            `SELECT user_id, name, dob, email, address 
+             from users;`
+        );
+
+        return res.status(200).json({
+            success: true,
+            usersList: rows,
+            msg: "User fetched Successfully!",
+        });
+
+    } catch (e) {
+        return res.status(400).json({
+            error: e,
+            success: false,
+            msg: "Something Went Wrong!",
+        });
+    }
+};
+
 exports.getCurrentUser = async (req, res) => {
 
     try {
@@ -141,6 +166,12 @@ exports.deleteUser = async (req, res) => {
             [user_id]
         );
 
+        await db.query(
+            `DELETE 
+             FROM friends
+             where user_id = $1 OR friend_id = $1;`,
+            [user_id]
+        );
         await db.query(
             `DELETE 
              FROM users

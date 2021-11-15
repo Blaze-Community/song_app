@@ -4,7 +4,8 @@ const {
     getUser,
     getCurrentUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    allUser
 } = require("../controllers/user");
 
 const { requireSignin } = require("../middlewares/auth");
@@ -16,13 +17,15 @@ const {
 
 const router = express.Router();
 
-router.get("/:id", getUser);
+router.get("/allUser", allUser);
 
 router.get("/", requireSignin, getCurrentUser);
 
 router.put("/", requireSignin, validateUserRequest, isRequestValidated, updateUser);
 
 router.delete("/", requireSignin, deleteUser);
+
+router.get("/:id", getUser);
 
 module.exports = router;
 
