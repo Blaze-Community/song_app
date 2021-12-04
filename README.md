@@ -52,3 +52,7 @@ npm start
 ```
 
 - Press CTRL-C to shut the server down.
+
+### HOSTED ON HEROKU
+
+[Chit-Chat Music App](https://chit-chat-music.web.app/)
